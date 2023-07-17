@@ -4,7 +4,7 @@ import {
 } from 'http';
 import cluster from 'cluster';
 import { cpus } from 'os';
-import { getUsers } from './users';
+import { getUsers, createUser } from './users';
 
 class App {
   private PORT: number;
@@ -56,6 +56,9 @@ class App {
       switch (req.method) {
         case 'GET':
           getUsers(req, res);
+          break;
+        case 'POST':
+          createUser(req, res);
           break;
         default: console.log('=(');
       }
