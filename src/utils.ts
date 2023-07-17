@@ -1,6 +1,19 @@
-export function ifValidUser(ReqBody: string) {
+import { User, UserID } from 'types';
+import { users } from './users';
+
+export function isValidUser(
+  ReqBody: string,
+  upDateUser?: User,
+  id?: UserID,
+) {
   try {
-    const user = JSON.parse(ReqBody.toString());
+    let user = JSON.parse(ReqBody.toString());
+    if (upDateUser && id) {
+      user = {
+        ...users.get(id),
+        ...upDateUser,
+      };
+    }
     const hasOwnProperty = ['username', 'age', 'hobbies'].every((key) => key in user);
     const isUserHobbiesString = user.hobbies.every((key: string) => typeof key === 'string');
 

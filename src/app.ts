@@ -4,7 +4,7 @@ import {
 } from 'http';
 import cluster from 'cluster';
 import { cpus } from 'os';
-import { getUsers, createUser } from './users';
+import { getUsers, createUser, updateUser } from './users';
 
 class App {
   private PORT: number;
@@ -59,6 +59,9 @@ class App {
           break;
         case 'POST':
           createUser(req, res);
+          break;
+        case 'PUT':
+          updateUser(req, res);
           break;
         default: console.log('=(');
       }
