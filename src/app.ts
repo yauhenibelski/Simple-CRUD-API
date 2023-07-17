@@ -4,6 +4,7 @@ import {
 } from 'http';
 import cluster from 'cluster';
 import { cpus } from 'os';
+import { getUsers } from './users';
 
 class App {
   private PORT: number;
@@ -43,13 +44,22 @@ class App {
   }
 
   private handleRequest(req: IncomingMessage, res: ServerResponse) {
-    this.balancer(req, res);
-    if (cluster.isWorker) {
+    if (process.env.NODE_ENV === 'multi') {
+      this.balancer(req, res);
+    }
+    if ((process.env.NODE_ENV === 'multi' && cluster.isWorker)
+        || (process.env.NODE_ENV === 'production' && cluster.isPrimary)) {
       res.writeHead(200, {
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/json',
       });
-      res.write(`I am ${process.pid}, port ${process.env.PORT}`);
-      res.end();
+      // res.write(`I am ${process.pid}, port ${process.env.PORT}`);
+      switch (req.method) {
+        case 'GET':
+          getUsers(req, res);
+          break;
+        default: console.log('=(');
+      }
+      // res.end(JSON.stringify(users));
     }
   }
 
