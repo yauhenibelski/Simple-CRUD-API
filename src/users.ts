@@ -1,6 +1,6 @@
 import { User, UserID } from 'types';
 import { RequestListener } from 'http';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid, validate } from 'uuid';
 import { isValidUser } from './utils';
 
 export const users = new Map<UserID, User>();
@@ -32,7 +32,7 @@ export const createUser: RequestListener = async (req, res) => {
       case '/api/users':
         if (isValidUser(body)) {
           const user = JSON.parse(body.toString());
-          const userId = uuidv4();
+          const userId = uuid();
 
           users.set(userId, {
             id: userId,
@@ -80,4 +80,27 @@ export const updateUser: RequestListener = async (req, res) => {
       res.end('Request to a non-existent endpoint');
     }
   });
+};
+export const deleteUser: RequestListener = async (req, res) => {
+  const url = new URL(req.url!, `http://${req.headers.host}`);
+  const [userId] = url.pathname.split('/').reverse();
+
+  switch (url.pathname) {
+    case '/api/users':
+      if (users.has(userId)) {
+        users.delete(userId);
+        res.writeHead(200);
+        res.end();
+      } else if (!validate(userId)) {
+        res.writeHead(400);
+        res.end('UserId is invalid');
+      } else {
+        res.writeHead(404);
+        res.end('User not found');
+      }
+      break;
+    default:
+      res.writeHead(404);
+      res.end('Request to a non-existent endpoint');
+  }
 };
